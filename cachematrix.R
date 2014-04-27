@@ -51,9 +51,17 @@
 
 
 # **********************************************
+# REQUIREMENTS
+# ----------------------------------------------
+# The provided matrix has to be quadratic.
+# If quadratic, invertability is assumed.
+# ----------------------------------------------
+
+
+
+# **********************************************
 # ASSIGNMENT
 # ----------------------------------------------
-#
 # Create and return a special matrix object
 # that can cache its inverse.
 makeCacheMatrix <- function(x = matrix())
@@ -62,14 +70,14 @@ makeCacheMatrix <- function(x = matrix())
     cache = NULL
     
     # Set matrix in defining environment and reset cache.
-    set <- function(input)
+    set_matrix <- function(input)
     {
         x <<- input
         cache <<- NULL
     }
 
     # Accessing function
-    get <- function()
+    get_matrix <- function()
     {
         x
     }
@@ -87,12 +95,28 @@ makeCacheMatrix <- function(x = matrix())
     }
     
     # Return the special matrix.
-    matrix(
+    list(    get=get_matrix,      set=set_matrix,
+         get_inv=get_inverse, set_inv=set_inverse)
 }
 
 # Calculate and return the inverse matrix of 'x'.
-cacheSolve <- function(x, ...)
+cacheSolve <- function(special_matrix, ...)
 {
+    # Query the cache of the special_matrix.
+    tmp <- special_matrix$get_inv()
+
     # If inverse already calculated and x not changed
     # then the inverse is retrieved from cache.
+    if(!is.null(tmp))
+    {
+        message("Getting cached inverse matrix.")
+        return(tmp)
+    }
+
+    # Calculate the inverse and writing to cache.
+    data           <- special_matrix$get()
+    unit_matrix    <- diag(ncol(data))
+    inverse_matrix <- solve(data, unit_matrix)
+    special_matrix$set_inv(inverse_matrix)
+    return(inverse_matrix)
 }
